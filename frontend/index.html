@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site do Clima</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 id="city-name">Cidade</h1>
+        <h2 id="temperature">--°C</h2>
+        <p id="weather-description">Descrição do clima</p>
+        <p id="max-min">Máx.: --° Mín.: --°</p>
+        
+        <div class="alert">
+            <h3>Clima extremo</h3>
+            <p id="weather-alert">Sem alertas no momento.</p>
+        </div>
+
+        <div class="forecast-hourly">
+            <h3>Previsão por hora</h3>
+            <div id="hourly-forecast">
+                <!-- Previsão horária será inserida aqui -->
+            </div>
+        </div>
+
+        <div class="forecast-daily">
+            <h3>Previsão para os próximos dias</h3>
+            <div id="daily-forecast">
+                <!-- Previsão diária será inserida aqui -->
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
