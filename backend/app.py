@@ -1,63 +1,122 @@
-from flask import Flask, jsonify, request,send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 import requests
 import os
 
 app = Flask(__name__)
 
-# Obter a API Key da variável de ambiente
-API_KEY = os.getenv('API_KEY')
-BASE_URL = 'https://api.openweathermap.org/data/2.5/'
+# Obter a API Key e URL base da variável de ambiente
+API_KEY = os.getenv("API_KEY")
+BASE_URL = 'https://api.weatherbit.io/v2.0/'
 
-app = Flask(__name__)
-
-
+# Servir o arquivo HTML principal e arquivos estáticos
 @app.route('/')
 def serve_index():
     return send_from_directory('../frontend', 'index.html')
 
-# Rota para servir arquivos estáticos (CSS e JavaScript)
 @app.route('/<path:filename>')
 def serve_static(filename):
     return send_from_directory('../frontend', filename)
 
-# Variável de ambiente para chave da API
-API_KEY = os.getenv("API_KEY")
-BASE_URL = 'https://api.openweathermap.org/data/2.5/'
-
+# Endpoint para obter o clima atual
 @app.route('/api/weather/current', methods=['GET'])
 def get_current_weather():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
+    
+    # Verificar se os parâmetros de localização estão presentes
     if not lat or not lon:
         return jsonify({"error": "Parâmetros 'lat' e 'lon' são necessários"}), 400
-
-    # Monta a URL da API do Weatherbit
-    weather_url = f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lon}&key={API_KEY}"
     
-    # Faz a requisição à API do Weatherbit
-    response = requests.get(weather_url)
-    if response.status_code == 200:
+    # Montar a URL da API e realizar a requisição
+    weather_url = f"{BASE_URL}current?lat={lat}&lon={lon}&key={API_KEY}&lang=pt_br"
+    try:
+        response = requests.get(weather_url)
+        response.raise_for_status()  # Levantar exceção para códigos de erro HTTP
         weather_data = response.json()
         
-        # Extrai e organiza os dados necessários para o frontend
-        if 'data' in weather_data and len(weather_data['data']) > 0:
-            data = weather_data['data'][0]
-            formatted_data = {
-                "name": data.get("city_name"),
-                "main": {
-                    "temp": data.get("temp"),
-                    "temp_max": data.get("max_temp", data.get("temp")),  # A API pode não ter temp_max, usando temp como fallback
-                    "temp_min": data.get("min_temp", data.get("temp"))   # A API pode não ter temp_min, usando temp como fallback
-                },
-                "weather": [{
-                    "description": data.get("weather", {}).get("description")
-                }]
-            }
-            return jsonify(formatted_data)
-        else:
-            return jsonify({"error": "Dados de clima não encontrados na resposta"}), 500
-    else:
-        return jsonify({"error": "Não foi possível obter os dados de clima"}), response.status_code
+        # Extrair e formatar dados, garantindo valores padrão
+        data = weather_data.get("data", [{}])[0]
+        formatted_data = {
+            "name": data.get("city_name", "Desconhecido"),
+            "main": {
+                "temp": data.get("temp", 0),
+                "temp_max": data.get("max_temp", data.get("temp", 0)),
+                "temp_min": data.get("min_temp", data.get("temp", 0))
+            },
+            "weather": [{
+                "description": data.get("weather", {}).get("description", "Sem descrição")
+            }]
+        }
+        return jsonify(formatted_data)
+    
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": "Não foi possível obter os dados de clima", "details": str(e)}), 500
 
+# Endpoint para obter a previsão por hora
+@app.route('/api/weather/hourly', methods=['GET'])
+def get_hourly_forecast():
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+    
+    if not lat or not lon:
+        return jsonify({"error": "Parâmetros 'lat' e 'lon' são necessários"}), 400
+    
+    # Montar a URL da API para previsão por hora
+    hourly_url = f"{BASE_URL}forecast/hourly?lat={lat}&lon={lon}&key={API_KEY}&lang=pt_br"
+    try:
+        response = requests.get(hourly_url)
+        response.raise_for_status()
+        weather_data = response.json()
+
+        # Formatar os dados para enviar como resposta
+        hourly_data = weather_data.get("data", [])
+        forecast = []
+
+        for hour_data in hourly_data[:12]:  # Limitar a previsão para as próximas 12 horas
+            forecast.append({
+                "time": hour_data.get("timestamp_local", ""),
+                "temp": hour_data.get("temp", 0),
+                "description": hour_data.get("weather", {}).get("description", "Sem descrição")
+            })
+
+        return jsonify(forecast)
+    
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": "Não foi possível obter os dados de previsão por hora", "details": str(e)}), 500
+
+# Novo endpoint para obter a previsão diária
+@app.route('/api/weather/daily', methods=['GET'])
+def get_daily_forecast():
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+    
+    if not lat or not lon:
+        return jsonify({"error": "Parâmetros 'lat' e 'lon' são necessários"}), 400
+    
+    # Montar a URL da API para previsão diária
+    daily_url = f"{BASE_URL}forecast/daily?lat={lat}&lon={lon}&key={API_KEY}&lang=pt_br"
+    try:
+        response = requests.get(daily_url)
+        response.raise_for_status()
+        weather_data = response.json()
+
+        # Formatar os dados para enviar como resposta
+        daily_data = weather_data.get("data", [])
+        forecast = []
+
+        for day_data in daily_data[:5]:  # Limitar a previsão para os próximos 5 dias
+            forecast.append({
+                "date": day_data.get("valid_date", ""),
+                "temp": day_data.get("temp", 0),
+                "description": day_data.get("weather", {}).get("description", "Sem descrição")
+            })
+
+        return jsonify(forecast)
+    
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": "Não foi possível obter os dados de previsão diária", "details": str(e)}), 500
+
+# Iniciar o servidor
 if __name__ == '__main__':
     app.run(debug=True)
+
