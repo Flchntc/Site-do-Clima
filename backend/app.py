@@ -28,7 +28,7 @@ def get_current_weather():
         return jsonify({"error": "Parâmetros 'lat' e 'lon' são necessários"}), 400
     
     # Montar a URL da API e realizar a requisição
-    weather_url = f"{BASE_URL}current?lat={lat}&lon={lon}&key={API_KEY}&lang=pt_br"
+    weather_url = f"{BASE_URL}current?lat={lat}&lon={lon}&key={API_KEY}&lang=pt"
     try:
         response = requests.get(weather_url)
         response.raise_for_status()  # Levantar exceção para códigos de erro HTTP
@@ -62,7 +62,7 @@ def get_hourly_forecast():
         return jsonify({"error": "Parâmetros 'lat' e 'lon' são necessários"}), 400
     
     # Montar a URL da API para previsão por hora
-    hourly_url = f"{BASE_URL}forecast/hourly?lat={lat}&lon={lon}&key={API_KEY}&lang=pt_br"
+    hourly_url = f"{BASE_URL}forecast/hourly?lat={lat}&lon={lon}&key={API_KEY}&lang=pt"
     try:
         response = requests.get(hourly_url)
         response.raise_for_status()
@@ -94,7 +94,7 @@ def get_daily_forecast():
         return jsonify({"error": "Parâmetros 'lat' e 'lon' são necessários"}), 400
     
     # Montar a URL da API para previsão diária
-    daily_url = f"{BASE_URL}forecast/daily?lat={lat}&lon={lon}&key={API_KEY}&lang=pt_br"
+    daily_url = f"{BASE_URL}forecast/daily?lat={lat}&lon={lon}&key={API_KEY}&lang=pt"
     try:
         response = requests.get(daily_url)
         response.raise_for_status()
