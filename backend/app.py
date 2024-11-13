@@ -17,31 +17,38 @@ def serve_index():
 def serve_static(filename):
     return send_from_directory('../frontend', filename)
 
-# Endpoint para obter o clima atual
 @app.route('/api/weather/current', methods=['GET'])
 def get_current_weather():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
     
-    # Verificar se os parâmetros de localização estão presentes
     if not lat or not lon:
         return jsonify({"error": "Parâmetros 'lat' e 'lon' são necessários"}), 400
     
-    # Montar a URL da API e realizar a requisição
+    # Endpoint para o clima atual
     weather_url = f"{BASE_URL}current?lat={lat}&lon={lon}&key={API_KEY}&lang=pt"
+    daily_url = f"{BASE_URL}forecast/daily?lat={lat}&lon={lon}&key={API_KEY}&lang=pt"
+    
     try:
+        # Requisição para o clima atual
         response = requests.get(weather_url)
-        response.raise_for_status()  # Levantar exceção para códigos de erro HTTP
+        response.raise_for_status()
         weather_data = response.json()
-        
-        # Extrair e formatar dados, garantindo valores padrão
         data = weather_data.get("data", [{}])[0]
+        
+        # Requisição para a previsão diária
+        daily_response = requests.get(daily_url)
+        daily_response.raise_for_status()
+        daily_data = daily_response.json()
+        daily_forecast = daily_data.get("data", [{}])[0]
+
+        # Extrair valores de temp, max_temp e min_temp
         formatted_data = {
             "name": data.get("city_name", "Desconhecido"),
             "main": {
                 "temp": data.get("temp", 0),
-                "temp_max": data.get("max_temp", data.get("temp", 0)),
-                "temp_min": data.get("min_temp", data.get("temp", 0))
+                "temp_max": daily_forecast.get("max_temp", data.get("temp", 0)),
+                "temp_min": daily_forecast.get("min_temp", data.get("temp", 0))
             },
             "weather": [{
                 "description": data.get("weather", {}).get("description", "Sem descrição")
@@ -51,6 +58,8 @@ def get_current_weather():
     
     except requests.exceptions.RequestException as e:
         return jsonify({"error": "Não foi possível obter os dados de clima", "details": str(e)}), 500
+
+
 
 # Endpoint para obter a previsão por hora
 @app.route('/api/weather/hourly', methods=['GET'])

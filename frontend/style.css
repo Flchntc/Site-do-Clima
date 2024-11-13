@@ -20,7 +20,7 @@ body {
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 16px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 90%;
+    width: 100%;
     max-width: 535px;
 }
 
@@ -55,6 +55,7 @@ p {
     margin: 10px 0;
     color: black;
     width:100% ;
+
 }
 
 .forecast-hourly h3, .forecast-daily h3 {
@@ -67,10 +68,11 @@ p {
 #hourly-forecast-container, .forecast-hourly div, .forecast-daily div {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 10px;
     text-align: center;
-
+    width: 100%;
+    
 }
 
 /* Estilo para botões */
@@ -79,11 +81,12 @@ button {
     color: white;
     border: none;
     padding: 5px 10px;
-    cursor: pointer;
     font-size: 1.5em;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 11px;
+    box-shadow: 0 5px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
 }
+
 
 #daily-forecast-container {
     display: flex;

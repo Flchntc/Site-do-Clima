@@ -66,10 +66,12 @@ function updateDailyForecast() {
 
 // Função para alterar o dia exibido na previsão diária
 function alterarDia(direcao) {
-    diaAtualIndex += direcao;
-    if (diaAtualIndex < 0) diaAtualIndex = previsaoDiaria.length - 1;
-    if (diaAtualIndex >= previsaoDiaria.length) diaAtualIndex = 0;
-    updateDailyForecast();
+    const novoIndex = diaAtualIndex + direcao;
+    // Verifica se o novo índice está dentro dos limites do array
+    if (novoIndex >= 0 && novoIndex < previsaoDiaria.length) {
+        diaAtualIndex = novoIndex;
+        updateDailyForecast();
+    }
 }
 
 function updateWeather(data) {
@@ -119,11 +121,14 @@ function updateHourlyForecast() {
     }
 }
 
+// Função para alterar a hora exibida na previsão horária
 function alterarHora(direcao) {
-    horaAtualIndex += direcao;
-    if (horaAtualIndex < 0) horaAtualIndex = previsaoPorHora.length - 1;
-    if (horaAtualIndex >= previsaoPorHora.length) horaAtualIndex = 0;
-    updateHourlyForecast();
+    const novoIndex = horaAtualIndex + direcao;
+    // Verifica se o novo índice está dentro dos limites do array
+    if (novoIndex >= 0 && novoIndex < previsaoPorHora.length) {
+        horaAtualIndex = novoIndex;
+        updateHourlyForecast();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -151,3 +156,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('city-name').textContent = "Geolocalização não suportada";
     }
 });
+
